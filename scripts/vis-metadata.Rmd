@@ -1,0 +1,225 @@
+---
+title: "Visualize Curriculum Metadata"
+author: "Zach"
+date: 2020-06-08
+output:
+  github_document
+---
+
+# Setup
+<!-- -------------------------------------------------- -->
+
+```{r script-setup}
+library(tidyverse)
+library(NCmisc)
+library(ggrepel)
+
+## Filenames
+filename_seq <- "../sequence.md"
+filename_schedule <- "./schedule.csv"
+
+## Data directory
+exercise_data <- "../exercises"
+
+df_ex_files <-
+  tibble(file = list.files(exercise_data, full.names = TRUE)) %>%
+  filter(
+    str_detect(file, "Rmd$"),
+    str_detect(file, "master")
+  ) %>%
+  mutate(
+    filename = str_extract(file, "[^/]+\\.Rmd"),
+    name = str_remove(filename, "(-master)?\\.Rmd")
+  )
+
+df_schedule <- read_csv(filename_schedule)
+
+## Flatten function list
+flatten_funs <- function(l) {
+  res <- c()
+
+  if (length(l) > 0) {
+    for (i in 1:length(l)) {
+      res <- c(res, l[[i]])
+    }
+
+    res
+  } else{
+    NA_character_
+  }
+}
+```
+
+Parse all exercise files; determine functions used and read metadata.
+
+```{r load-exercises, echo=FALSE, message=FALSE}
+df_exercises <-
+  pmap_dfr(
+    df_ex_files,
+    function(file, filename, name) {
+      ## Render R file for function discovery
+      fileR <- str_replace(file, "Rmd", "R")
+      knitr::purl(file, output = fileR)
+      funs <- list.functions.in.file(fileR, alphabetic = TRUE)
+      ## Delete temporary R file
+      unlink(fileR)
+
+      ## Parse Rmd file yaml
+      df_result <-
+      rmarkdown::yaml_front_matter(file) %>%
+        as_tibble() %>%
+        mutate(
+          total = time + reading,
+          name = name,
+          catnum = str_extract(name, "[[:alpha:]]+\\d+"),
+          functions = list(flatten_funs(funs))
+        ) %>%
+        extract(
+          col = catnum,
+          into = c("category", "number"),
+          regex = "([[:alpha:]]+)(\\d+)",
+          convert = TRUE
+        )
+    }
+  ) %>%
+  mutate(name = str_remove(name, "-master"))
+```
+
+Dump metadata file to disk
+
+```{r write-exercise-metadata}
+saveRDS(
+  df_exercises,
+  "./metadata.rds"
+)
+```
+
+# Scheduling
+<!-- -------------------------------------------------- -->
+
+Schedule the exercise curriculum
+
+```{r schedule}
+## Compute day totals
+df_day_totals <-
+  left_join(
+    df_exercises,
+    df_schedule,
+    by = "name"
+  ) %>%
+  full_join(
+    .,
+    tibble(day = seq(0, 45)),
+    by = "day"
+  ) %>%
+  group_by(day) %>%
+  mutate(day_mins = sum(total)) %>%
+  select(name, day, total, day_mins) %>%
+  arrange(day)
+
+df_day_totals %>%
+  knitr::kable()
+```
+
+### Markdown schedule
+<!-- ------------------------- -->
+
+```{r md-schedule}
+## Format table as string
+string_table <-
+  df_day_totals %>%
+  rename(
+    Filename = name,
+    Day = day,
+    `Exercise Duration (minutes)` = total,
+    `Day Duration (minutes)` = day_mins
+  ) %>%
+  knitr::kable(format = "markdown") %>%
+  c(.)
+
+## Write schedule file
+writeLines(string_table, filename_seq)
+```
+
+### Visual schedule
+<!-- ------------------------- -->
+
+Visualize schedule
+
+```{r vis-schedule}
+left_join(
+  df_exercises,
+  df_schedule,
+  by = "name"
+) %>%
+  # filter(!str_detect(category, "setup")) %>%
+
+  ggplot(aes(category, day)) +
+  geom_label(
+    aes(label = name, fill = category)
+  ) +
+
+  scale_y_reverse() +
+  guides(fill = "none") +
+  theme_minimal() +
+  labs(
+    x = "Category",
+    y = "Day",
+    title = "Exercise Curriculum"
+  )
+
+```
+
+# Summaries
+<!-- -------------------------------------------------- -->
+
+Total exercise time, in hours
+
+```{r exercise-time}
+df_exercises %>%
+  mutate(across(c(time, reading, total), ~ . / 60)) %>%
+  summarize(across(c(time, reading, total), sum)) %>%
+  knitr::kable()
+```
+
+Exercise time, by category
+
+```{r exercise-category-time}
+df_exercises %>%
+  group_by(category) %>%
+  mutate(across(c(time, reading, total), ~ . / 60)) %>%
+  summarize(across(c(time, reading, total), sum)) %>%
+  knitr::kable()
+```
+
+Visualize
+
+```{r exercise-times}
+df_exercises %>%
+  select(name, category, exercise = time, reading) %>%
+  pivot_longer(
+    names_to = "type",
+    values_to = "time",
+    c(exercise, reading)
+  ) %>%
+
+  ggplot(aes(name, time, fill = type)) +
+  geom_col() +
+  coord_flip() +
+  facet_grid(category~., scales = "free_y")
+```
+
+# Function reference
+<!-- -------------------------------------------------- -->
+
+Generate a list of all exercises where each function is used:
+
+```{r fun-ref}
+df_funs <-
+  df_exercises %>%
+  unnest(functions) %>%
+  rename(fun = functions) %>%
+  select(fun, name) %>%
+  arrange(fun)
+```
+
