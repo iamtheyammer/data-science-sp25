@@ -1,0 +1,16 @@
+Imports:
+    tidyverse,
+    bookdown,
+    testthat,
+    broom,
+    curl,
+    fitdistrplus,
+    gapminder,
+    ggrepel,
+    googlesheets4,
+    nycflights13,
+    modelr,
+    mvtnorm,
+    rsample,
+    Rtsne,
+    viridis
