@@ -1,7 +1,7 @@
 ---
 title: "Getting Started: Diamonds"
-author: "(Your name here)"
-date: 2020-
+author: "Sam Mendelson"
+date: 2025-01-29
 output:
   github_document:
     toc: true
@@ -55,22 +55,35 @@ In this first stage, you will explore the `diamonds` dataset and document your o
 ```{r q1-task}
 ## TASK: Plot `price` vs `carat` below
 ## Your code here!
+diamonds %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_point()
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- Price increases as carat increases.
+- More diamonds have round carats (0.5, 1, 1.5, etc.) than other carat values.
+- Some outliers exist, with high prices for low carat values (other variables may explain this).
+- There are very, very few diamonds above 2.5 carats.
 
 ### __q2__ Create a visualization showing variables `carat`, `price`, and `cut` simultaneously. Experiment with which variable you assign to which aesthetic (`x`, `y`, etc.) to find an effective visual.
 
 ```{r q2-task}
 ## TASK: Plot `price`, `carat`, and `cut` below
 ## Your code here!
+
+diamonds %>%
+  ggplot(aes(x = carat, y = price, color = cut)) +
+  geom_point()
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- In general, the better the cut, the higher the price.
+- Cuts get worse as carats increase.
+- 'Ideal' cut diamonds are largely <= 1.5 carats.
+- There are likely still more variables to consider in explaining price: many diamonds of the same cut and carat have different prices.
 
 
 # Communication
