@@ -1,7 +1,7 @@
 ---
 title: "RMS Titanic"
-author: "(Your name here)"
-date: 2020-
+author: "Sam Mendelson"
+date: 2025-02-05
 output:
   github_document:
     toc: true
@@ -52,11 +52,16 @@ df_titanic <- as_tibble(Titanic)
 
 ```{r q1-task}
 ## TASK: Perform a `glimpse` of df_titanic
+glimpse(df_titanic)
 ```
 
 **Observations**:
 
-- (List all variables here)
+- Class
+- Sex
+- Age
+- Survived
+- n
 
 ### __q2__ Skim the [Wikipedia article](https://en.wikipedia.org/wiki/RMS_Titanic) on the RMS Titanic, and look for a total count of souls aboard. Compare against the total computed below. Are there any differences? Are those differences large or small? What might account for those differences?
 
@@ -68,12 +73,11 @@ df_titanic %>% summarize(total = sum(n))
 
 **Observations**:
 
-- Write your observations here
 - Are there any differences?
-  - (Your response here)
+  - There is a difference of 1 person: Wikipedia says that there were [1,317 passengers onboard](https://en.wikipedia.org/wiki/Titanic#Passengers) and [885 crew](https://en.wikipedia.org/wiki/Titanic#Crew), for a total of 2,202 souls.
 - If yes, what might account for those differences?
-  - (Your response here)
-  - ...
+  - Under both Crew and Passengers (in the Maiden Voyage section) Wikipedia uses the word "approximately" for the counts.
+  - Passenger counts at the time varied between sources, too.
 
 ### __q3__ Create a plot showing the count of persons who *did* survive, along with aesthetics for `Class` and `Sex`. Document your observations below.
 
@@ -81,11 +85,20 @@ df_titanic %>% summarize(total = sum(n))
 
 ```{r q3-task}
 ## TASK: Visualize counts against `Class` and `Sex`
+survivors <- df_titanic %>% filter(Survived == "Yes")
+
+survivors %>%
+  ggplot(aes(x = Class, y = n)) +
+  geom_col(aes(fill = Sex), position = "dodge") +
+  ggtitle("Titanic Survivors by Class and Sex")
 ```
 
 **Observations**:
 
-- Write your observations here
+- It's clear that women were first in line for lifeboats, as far more women survived than men in all classes.
+- The total number of survivors is highest in first class, followed by third class, then second class.
+- Very few of the female crew survived. It is possible that this is due to the crew being made up of mostly men.
+- The number of survivors in third class is higher than in second class, which is surprising given the common perception that third class passengers were the last to be saved.
 
 # Deeper Look
 <!-- -------------------------------------------------- -->
@@ -111,26 +124,41 @@ df_prop
 ### __q4__ Replicate your visual from q3, but display `Prop` in place of `n`. Document your observations, and note any new/different observations you make in comparison with q3. Is there anything *fishy* in your plot?
 
 ```{r q4-task}
+df_prop %>%
+  filter(Survived == "Yes") %>%
+    ggplot(aes(x = Class, y = Prop, fill = Sex)) +
+    geom_col(position = "dodge") +
+    ggtitle("Proportion of Titanic Survivors, by Class and Sex")
 ```
 
 **Observations**:
 
-- Write your observations here.
+- The plot shows that equal proportions of 1st and 2nd class men and women survived, which is incongruent with the historical record where women and children were loaded into lifeboats first.
+- The proportion of female crew members who survived is higher than the proportion of 3rd class women who survived.
 - Is there anything *fishy* going on in your plot?
-  - (Your response here)
+  - One clear sign that something fishy is going on is that this chart appears to show that (at least in 1st and 2nd class), an equal proportion of men and women survived. However, we know this is untrue from historical records and our first chart.
 
 ### __q5__ Create a plot showing the group-proportion of occupants who *did* survive, along with aesthetics for `Class`, `Sex`, *and* `Age`. Document your observations below.
 
 *Hint*: Don't forget that you can use `facet_grid` to help consider additional variables!
 
 ```{r q5-task}
+
+df_prop %>%
+  filter(Survived == "Yes") %>%
+    ggplot(aes(x = Class, y = Prop, Age)) +
+    facet_grid(~Age) +
+    geom_col(aes(fill = Sex), position = "dodge")
 ```
 
 **Observations**:
 
-- (Write your observations here.)
+- By splitting the chart by age, we see a plot that matches the historical record: women and children were loaded into lifeboats first.
+- The proportion of survivors is highest in first class, followed by third class, then second class.
+- It does show that 100% of children in 1st and 2nd class survived (which is not true), so there may be some data quality issues.
 - If you saw something *fishy* in q4 above, use your new plot to explain the fishy-ness.
-  - (Your response here)
+  - Now, we see that tons and tons of men and women that survived in 1st and 2nd class were children, which were offloaded first (with adult women).
+  - Since a much smaller percentage of 3rd class women survived, it's likely that they were carrying the 3rd class children, therefore the proportion of 3rd class children who survived is lower (which this graph supports).
 
 # Notes
 <!-- -------------------------------------------------- -->
