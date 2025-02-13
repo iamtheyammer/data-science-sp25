@@ -24,6 +24,13 @@
             </RMarkdownRenderProfile>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/challenges/c02-michelson-assignment.Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/challenges" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/exercises_sequenced/d03-e-setup04-rstudio-shortcuts-assignment.Rmd">
           <value>
             <RMarkdownRenderProfile>
@@ -74,6 +81,20 @@
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/exercises_sequenced/d08-e-vis01-bar-charts-assignment.Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/exercises_sequenced" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/exercises_sequenced/d09-e-data02-derive-assignment.Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/exercises_sequenced" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/exercises_sequenced/d10-e-vis02-histograms-assignment.Rmd">
           <value>
             <RMarkdownRenderProfile>
               <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/exercises_sequenced" />
