@@ -42,7 +42,7 @@ define how you will be graded, both on an individual and team basis.
 <!-- ------------------------- -->
 
 | Category | Needs Improvement | Satisfactory |
-|-------------------|----------------------------|-------------------------|
+|----|----|----|
 | Effort | Some task **q**'s left unattempted | All task **q**'s attempted |
 | Observed | Did not document observations, or observations incorrect | Documented correct observations based on analysis |
 | Supported | Some observations not clearly supported by analysis | All observations clearly supported by analysis (table, graph, etc.) |
@@ -278,8 +278,8 @@ different types.
 
 Neomycin appears most effective against gram-positive streptococcus.
 
- - Which of your visuals above (1 through 5) is **most effective** at
-helping to answer this question?
+-   Which of your visuals above (1 through 5) is **most effective** at
+    helping to answer this question?
 
 #1 or #2 have equal effectiveness here, although I think that #2 is
 easier to answer.
@@ -312,8 +312,8 @@ streptococcus family, specifically Streptococcus viridans and
 Streptococcus hemolyticus. It's also gram-positive, just like the rest
 of the streptococcus family (at least the ones in the dataset).
 
- - Which of your visuals above (1 through 5) is **most effective** at
-helping to answer this question?
+-   Which of your visuals above (1 through 5) is **most effective** at
+    helping to answer this question?
 
 I used #2 to answer this question.
 
