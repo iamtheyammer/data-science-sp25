@@ -97,6 +97,34 @@ The Islands allows you to ask islanders to complete tasks. If you just take meas
 
 Conduct an EDA on your data. Add as many code chunks as you need. Ensure your EDA gives enough context of the data for us to understand what comes next in this report.
 
+```{r}
+
+library(tidyverse)
+
+# Get a list of CSV files from the folder:
+files <- list.files("data/c10/", pattern = "_out\\.csv$", full.names = TRUE)
+
+# Read and combine all CSVs into one dataframe:
+df <- files %>%
+  set_names() %>%  # This keeps the file paths as names for tracking
+  map_dfr(~ {
+    read_csv(.x) %>%
+      group_by(HouseID) %>%
+      mutate(NumHouseOccupants = n()) %>%
+      ungroup()
+  }, .id = "filepath") %>%
+  # Extract town name from the filename by removing the folder path and "_out.csv"
+  mutate(Town = str_remove(basename(filepath), "_out\\.csv$")) %>%
+  # Select and order the columns as desired:
+  select(Town, HouseID, HouseSize, Name, NetWorth, Occupation, Age, NumChildren, NumHouseOccupants)
+
+save(df, file = "data/c10/final.RData")
+```
+
+```{r}
+load("data/c10/final.RData")
+```
+
 ### **q3** Key Analyses
 
 Present the key analyses that support your questions / hypotheses. This could include summary statistics (e.g., a proportion of Islanders), grouped summary statistics (e.g., a proportion for group A, and for group B), or visualizations (e.g., a histogram). This section should be short, and every analysis should directly relate to q4.
