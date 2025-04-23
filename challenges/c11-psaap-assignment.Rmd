@@ -1,6 +1,6 @@
 ---
 title: "Regression Case Study: PSAAP II"
-author: "Sam Mendelson (*unfinished*)"
+author: "Sam Mendelson"
 date: 2025-04-20
 output:
   github_document:
@@ -365,23 +365,37 @@ pr_level <- 0.8
 #        use the validation data to check your uncertainty estimates, and 
 #        make a recommendation on a *dependable range* of values for T_norm
 #        at the point `df_design`
-fit_q6 <- 
-  df_train %>%
-  lm(formula = T_norm ~ . - idx - avg_q - avg_T - rms_T)
+fit_q6 <- df_train %>% 
+  lm(T_norm ~ x + L + W + U_0, data = .)
+
+uncertainties <- df_design %>% 
+  add_uncertainties(
+    data   = .,
+    model  = fit_q6,
+    prefix = "pred",
+    interval = "prediction",
+    level    = pr_level
+  )
+
+uncertainties
 ```
 
 **Recommendation**:
 
 -   How much do you trust your model? Why?
-    -   (Your response here)
+    -   I have some faith in this model. I took a look at the data for the row closest to the design variables, and I found one with `x = 1` , `L = 0.1952910`, `W = 0.03197750` , and `U_0 = 2.000712` (near double the design value), and `T_norm = 1.1279114`, which is somewhere near our range.
 -   What kind of interval---confidence or prediction---would you use for this task, and why?
-    -   (Your response here)
+    -   I'm using a prediction interval because we care here about the range a new run will give given the uncontrolled variation.
 -   What fraction of validation cases lie within the intervals you predict? (NB. Make sure to calculate your intervals *based on the validation data*; don't just use one single interval!) How does this compare with `pr_level`?
-    -   (Your response here)
+    -   There are 60 cases and only 3 in df_validate are in this range, so that's 1/20 or 5%.
+
+        ```{r}
+        df_validate %>% filter(T_norm <= uncertainties$pred_upr & T_norm >= uncertainties$pred_lwr)
+        ```
 -   What interval for `T_norm` would you recommend the design team to plan around?
-    -   (Your response here)
+    -   1.877 to 2.3.
 -   Are there any other recommendations you would provide?
-    -   (Your response here)
+    -   Hire a professional consulting firm instead a bunch of students!
 
 *Bonus*: One way you could take this analysis further is to recommend which other variables the design team should tightly control. You could do this by fixing values in `df_design` and adding them to the model. An exercise you could carry out would be to systematically test the variables to see which ones the design team should more tightly control.
 

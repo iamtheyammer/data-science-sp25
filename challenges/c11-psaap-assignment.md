@@ -1,6 +1,6 @@
 Regression Case Study: PSAAP II
 ================
-Sam Mendelson (*unfinished*)
+Sam Mendelson
 2025-04-20
 
 - [Grading Rubric](#grading-rubric)
@@ -665,28 +665,62 @@ pr_level <- 0.8
 #        use the validation data to check your uncertainty estimates, and 
 #        make a recommendation on a *dependable range* of values for T_norm
 #        at the point `df_design`
-fit_q6 <- 
-  df_train %>%
-  lm(formula = T_norm ~ . - idx - avg_q - avg_T - rms_T)
+fit_q6 <- df_train %>% 
+  lm(T_norm ~ x + L + W + U_0, data = .)
+
+uncertainties <- df_design %>% 
+  add_uncertainties(
+    data   = .,
+    model  = fit_q6,
+    prefix = "pred",
+    interval = "prediction",
+    level    = pr_level
+  )
+
+uncertainties
 ```
+
+    ## # A tibble: 1 × 7
+    ##       x     L     W   U_0 pred_fit pred_lwr pred_upr
+    ##   <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>    <dbl>
+    ## 1     1   0.2  0.04     1     1.88     1.46     2.30
 
 **Recommendation**:
 
 - How much do you trust your model? Why?
-  - (Your response here)
+  - I have some faith in this model. I took a look at the data for the
+    row closest to the design variables, and I found one with `x = 1` ,
+    `L = 0.1952910`, `W = 0.03197750` , and `U_0 = 2.000712` (near
+    double the design value), and `T_norm = 1.1279114`, which is
+    somewhere near our range.
 - What kind of interval—confidence or prediction—would you use for this
   task, and why?
-  - (Your response here)
+  - I’m using a prediction interval because we care here about the range
+    a new run will give given the uncontrolled variation.
 - What fraction of validation cases lie within the intervals you
   predict? (NB. Make sure to calculate your intervals *based on the
   validation data*; don’t just use one single interval!) How does this
   compare with `pr_level`?
-  - (Your response here)
+  - There are 60 cases and only 3 in df_validate are in this range, so
+    that’s 1/20 or 5%.
+
+    ``` r
+    df_validate %>% filter(T_norm <= uncertainties$pred_upr & T_norm >= uncertainties$pred_lwr)
+    ```
+
+        ## # A tibble: 3 × 22
+        ##       x   idx     L      W   U_0     N_p    k_f   T_f rho_f    mu_f  lam_f  C_fp
+        ##   <dbl> <dbl> <dbl>  <dbl> <dbl>   <dbl>  <dbl> <dbl> <dbl>   <dbl>  <dbl> <dbl>
+        ## 1     1    25 0.182 0.0366  1.73  2.02e6 0.0887  368.  1.02 2.13e-5 0.0263  866.
+        ## 2     1    31 0.172 0.0329  1.95  1.72e6 0.109   253.  1.20 1.94e-5 0.0334 1104.
+        ## 3     1    33 0.188 0.0383  2.14  1.96e6 0.119   262.  1.30 1.89e-5 0.0285  989.
+        ## # ℹ 10 more variables: rho_p <dbl>, d_p <dbl>, C_pv <dbl>, h <dbl>, I_0 <dbl>,
+        ## #   eps_p <dbl>, avg_q <dbl>, avg_T <dbl>, rms_T <dbl>, T_norm <dbl>
 - What interval for `T_norm` would you recommend the design team to plan
   around?
-  - (Your response here)
+  - 1.877 to 2.3.
 - Are there any other recommendations you would provide?
-  - (Your response here)
+  - Hire a professional consulting firm instead a bunch of students!
 
 *Bonus*: One way you could take this analysis further is to recommend
 which other variables the design team should tightly control. You could
