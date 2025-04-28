@@ -130,9 +130,9 @@ you still need to count, because your numbers *will* be different!
   - 554 - 17 = 537 / 554 = 96.9%
 - Are there any sources of *real* uncertainty in the percent occupied
   you calculated?
-  - No. The Islands is a computer program that can, at any time,
-    indicate whether a house is occupied or not. The program could have
-    a bug, but I don’t think that counts here.
+  - If islanders move around, then the number of unoccupied houses will
+    change over time, which could cause uncertainty.
+  - Islanders may move after we take our dataset.
 - Are there any sources of *erroneous* uncertainty in the percent
   occupied you calculated?
   - Yes, when counting the number of houses that are unoccupied, I could

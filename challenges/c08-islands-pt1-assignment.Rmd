@@ -28,7 +28,7 @@ Unlike exercises, **challenges will be graded**. The following rubrics define ho
 <!-- ------------------------- -->
 
 | Category | Needs Improvement | Satisfactory |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Effort | Some task **q**'s left unattempted | All task **q**'s attempted |
 | Observed | Did not document observations, or observations incorrect | Documented correct observations based on analysis |
 | Supported | Some observations not clearly supported by analysis | All observations clearly supported by analysis (table, graph, etc.) |
@@ -76,7 +76,8 @@ NB. When Zach counted the homes (on 2025-01-08), he found 20 unoccupied out of 5
 -   What percent of homes are *occupied*?
     -   554 - 17 = 537 / 554 = 96.9%
 -   Are there any sources of *real* uncertainty in the percent occupied you calculated?
-    -   No. The Islands is a computer program that can, at any time, indicate whether a house is occupied or not. The program could have a bug, but I don't think that counts here.
+    -   If islanders move around, then the number of unoccupied houses will change over time, which could cause uncertainty.
+    -   Islanders may move after we take our dataset.
 -   Are there any sources of *erroneous* uncertainty in the percent occupied you calculated?
     -   Yes, when counting the number of houses that are unoccupied, I could have missed one. I do know, however, that all unoccupied houses I counted are actually unoccupied, as when I clicked on them, they say "This house is unoccupied."
 

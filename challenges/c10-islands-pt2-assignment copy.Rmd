@@ -143,12 +143,15 @@ files <- list.files("data/c10/", pattern = "_out\\.csv$", full.names = TRUE)
 # Read and combine all CSVs into one dataframe
 df <- files %>%
   set_names() %>%  # This keeps the file paths as names for tracking
-  map_dfr(~ {
-    read_csv(.x) %>%
-      group_by(HouseID) %>%
-      mutate(NumHouseOccupants = n()) %>%
-      ungroup()
-  }, .id = "filepath") %>%
+  map_dfr(
+    ~ {
+      read_csv(.x) %>%
+        group_by(HouseID) %>%
+        mutate(NumHouseOccupants = n()) %>%
+        ungroup()
+    },
+    .id = "filepath"
+  ) %>%
   # Extracts the town name from the filename by removing the folder path and "_out.csv"
   mutate(Town = str_remove(basename(filepath), "_out\\.csv$")) %>%
   select(Town, HouseID, HouseSize, Name, NetWorth, Occupation, Age, NumChildren, NumHouseOccupants)

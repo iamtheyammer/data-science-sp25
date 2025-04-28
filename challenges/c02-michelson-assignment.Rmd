@@ -1,7 +1,7 @@
 ---
 title: "Michelson Speed-of-light Measurements"
-author: "(Your name here)"
-date: 2020-
+author: "Sam Mendelson"
+date: 2025-02-13
 output: 
   github_document:
     toc: true
@@ -35,7 +35,7 @@ define how you will be graded, both on an individual and team basis.
 <!-- ------------------------- -->
 
 | Category | Needs Improvement | Satisfactory |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Effort | Some task **q**'s left unattempted | All task **q**'s attempted |
 | Observed | Did not document observations, or observations incorrect | Documented correct observations based on analysis |
 | Supported | Some observations not clearly supported by analysis | All observations clearly supported by analysis (table, graph, etc.) |
@@ -179,15 +179,15 @@ lightspeed_error <- abs(LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON)
 lightspeed_error_error <- abs(lightspeed_error - LIGHTSPEED_PM)
 print(lightspeed_error)
 print(lightspeed_error_error)
-# compute the % difference between the real speed of light and the actual speed of light
-print((abs(LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON)/((LIGHTSPEED_VACUUM + LIGHTSPEED_MICHELSON))/2)*100)
+# compute the % error
+print((abs(LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON)/LIGHTSPEED_MICHELSON*100))
 ```
 
 **Observations**:
 
 -   Michaelson's estimate of his error (51m/s) is about 1/3 of the real
     error (\~150m/s). However, in perspective of these numbers, his
-    estimate of the speed of light is just 0.013% off.
+    estimate of the speed of light is just 0.05% off.
 
 The following plot shows all of Michelson's data as a [control
 chart](https://en.wikipedia.org/wiki/Control_chart); this sort of plot
@@ -300,7 +300,8 @@ df_with_error %>%
 
 **Observations**:
 
--   As temperature rises, distinctness goes up
+-   The median of the temperature increases as the distinctness
+    increases
 -   Since higher distinctness indicates a better estimate, one could
     conclude that the best estimates are taken around 80˚F - however,
     there are two big outliers around 60˚F

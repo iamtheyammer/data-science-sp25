@@ -208,7 +208,11 @@ glimpse(df_psaap)
 
 **Observations**:
 
-- Lots of variables
+- Lots of variables here, of many different categories:
+  - Spatial variables (x)
+  - Metadata (idx)
+  - 16 Input variables
+  - Four output variables
 - Could be pivoted wider to combine items inside idx, but likely easier
   to work this way
 
@@ -349,9 +353,10 @@ metrics(nonphysical_test, truth = T_norm, estimate = pred)
     performed.
 - What *Category* of variable is `avg_T`? Why is it such an effective
   predictor?
-  - `avg_T` is an output variable (plane-averaged fluid temperature),
-    and it makes sense that the average temperature would be a good
-    predictor of the normalized temperature.
+  - `avg_T` is an output variable (plane-averaged fluid temperature in
+    terms of `avg_T`: `T_norm = (avg_T - T_f) / T_f`), and it makes
+    sense that the average temperature would be a good predictor of the
+    normalized temperature.
 - Would we have access to `avg_T` if we were trying to predict a *new*
   value of `T_norm`? Is `avg_T` a valid predictor?
   - No. If we are trying to predict temperature, we can’t use
@@ -432,14 +437,28 @@ summary(fit_q4)
   - x, L, W, and I_0 are the most significant.
 - What is the regression coefficient for `x`? What about the regression
   coefficient for `T_f`?
-  - x = p ≤ 0.001 (highly significant), T_f = p \> 0.1 (not significant)
+  - x = 1.018e+00 (highly significant), T_f = -3.791e-04
 - What is the standard deviation of `x` in `df_psaap`? What about the
   standard deviation of `T_f`?
   - 0.281 / 38.9
+
+``` r
+df_psaap %>% 
+  summarize(
+    sd_x = sd(x),
+    sd_T_f = sd(T_f)
+  )
+```
+
+    ## # A tibble: 1 × 2
+    ##    sd_x sd_T_f
+    ##   <dbl>  <dbl>
+    ## 1 0.281   38.9
+
 - How do these standard deviations relate to the regression coefficients
-  for `x` and `T_f`?
-  - They help us understand the magnitude of change.
-  - A 1-SD increase in x → change in T_norm = 1.018 × 0.281 ≈ 0.286
+  for `x` and `T_f`? - They help us understand the magnitude of
+  change. - A 1-SD increase in x → change in T_norm = 1.018 × 0.281 ≈
+  0.286
 - Note that literally *all* of the inputs above have *some* effect on
   the output `T_norm`; so they are all “significant” in that sense. What
   does this tell us about the limitations of statistical significance
@@ -599,6 +618,9 @@ bind_rows(
 - Which model tends to be *more confident* in its predictions? Put
   differently, which model has *narrower prediction intervals*?
   - The q4 model is also more confident in its predictions.
+  - We can visually see that the prediction intervals are all very
+    similar, around three, in the x-only model. However they are much
+    smaller (none appear to go over 2.5) in the q4 model.
 - How many predictors does the `fit_simple` model need in order to make
   a prediction? What about your model `fit_q4`?
   - `fit_simple` used only one (`T_norm`). `fit_q4` used every input
@@ -661,7 +683,7 @@ df_design <- tibble(x = 1, L = 0.2, W = 0.04, U_0 = 1.0)
 # NOTE: This is the level the "probability" level customer wants
 pr_level <- 0.8
 
-## TODO: Fit a model, assess the uncertainty in your prediction, 
+# TODO: Fit a model, assess the uncertainty in your prediction, 
 #        use the validation data to check your uncertainty estimates, and 
 #        make a recommendation on a *dependable range* of values for T_norm
 #        at the point `df_design`
@@ -693,6 +715,8 @@ uncertainties
     `L = 0.1952910`, `W = 0.03197750` , and `U_0 = 2.000712` (near
     double the design value), and `T_norm = 1.1279114`, which is
     somewhere near our range.
+  - The empirical coverage is also 93.333%, meaning that our prediction
+    intervals are conservative but effective.
 - What kind of interval—confidence or prediction—would you use for this
   task, and why?
   - I’m using a prediction interval because we care here about the range
@@ -701,21 +725,30 @@ uncertainties
   predict? (NB. Make sure to calculate your intervals *based on the
   validation data*; don’t just use one single interval!) How does this
   compare with `pr_level`?
-  - There are 60 cases and only 3 in df_validate are in this range, so
-    that’s 1/20 or 5%.
+  - 93.333% of validation cases lie within the intervals, which is
+    higher than the goal of 80%.
 
-    ``` r
-    df_validate %>% filter(T_norm <= uncertainties$pred_upr & T_norm >= uncertainties$pred_lwr)
-    ```
+``` r
+validate_with_intervals <- df_validate %>%
+  add_uncertainties(
+    data = .,
+    model = fit_q6,
+    prefix = "pred",
+    interval = "prediction",
+    level = pr_level
+  )
 
-        ## # A tibble: 3 × 22
-        ##       x   idx     L      W   U_0     N_p    k_f   T_f rho_f    mu_f  lam_f  C_fp
-        ##   <dbl> <dbl> <dbl>  <dbl> <dbl>   <dbl>  <dbl> <dbl> <dbl>   <dbl>  <dbl> <dbl>
-        ## 1     1    25 0.182 0.0366  1.73  2.02e6 0.0887  368.  1.02 2.13e-5 0.0263  866.
-        ## 2     1    31 0.172 0.0329  1.95  1.72e6 0.109   253.  1.20 1.94e-5 0.0334 1104.
-        ## 3     1    33 0.188 0.0383  2.14  1.96e6 0.119   262.  1.30 1.89e-5 0.0285  989.
-        ## # ℹ 10 more variables: rho_p <dbl>, d_p <dbl>, C_pv <dbl>, h <dbl>, I_0 <dbl>,
-        ## #   eps_p <dbl>, avg_q <dbl>, avg_T <dbl>, rms_T <dbl>, T_norm <dbl>
+validate_with_intervals <- validate_with_intervals %>%
+  mutate(
+    covered = (T_norm >= pred_lwr) & (T_norm <= pred_upr)
+  )
+
+empirical_coverage <- mean(validate_with_intervals$covered)
+empirical_coverage
+```
+
+    ## [1] 0.9333333
+
 - What interval for `T_norm` would you recommend the design team to plan
   around?
   - 1.877 to 2.3.

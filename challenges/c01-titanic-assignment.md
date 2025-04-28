@@ -138,10 +138,16 @@ df_titanic %>% summarize(total = sum(n))
 
 - Are there any differences?
   - There is a difference of 1 person: Wikipedia says that there were
-    [1,317 passengers
+    approximately [1,317 passengers
     onboard](https://en.wikipedia.org/wiki/Titanic#Passengers) and [885
     crew](https://en.wikipedia.org/wiki/Titanic#Crew), for a total of
     2,202 souls.
+  - Wikipedia may use the word “approximately” for a few reasons, some
+    of which could have included:
+    - Passenger records may have gotten lost or damaged
+    - Some passengers may have been stowaways or were illegally on
+      *Titanic*
+    - The White Star Line may have had reasons to falsify records
 - If yes, what might account for those differences?
   - Under both Crew and Passengers (in the Maiden Voyage section)
     Wikipedia uses the word “approximately” for the counts.
@@ -165,8 +171,21 @@ survivors %>%
 
 **Observations**:
 
-- It’s clear that women were first in line for lifeboats, as far more
-  women survived than men in all classes.
+- It’s clear that women were first in line (or had a higher priority)
+  for lifeboats, as far more women survived than men in all classes.
+  - We know that there were not *just more women onboard* because if we
+    look at the second class, for example, there were many more men than
+    women however far more women survived than men (see plot below)
+
+``` r
+df_titanic %>%
+  ggplot(aes(x = Class, y = n)) +
+  geom_col(aes(fill = Sex), position = "dodge") +
+  ggtitle("Titanic Passengers by Class and Sex")
+```
+
+![](c01-titanic-assignment_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
 - The total number of survivors is highest in first class, followed by
   third class, then second class.
 - Very few of the female crew survived. It is possible that this is due
@@ -268,10 +287,30 @@ df_prop %>%
 - By splitting the chart by age, we see a plot that matches the
   historical record: women and children were loaded into lifeboats
   first.
+
 - The proportion of survivors is highest in first class, followed by
   third class, then second class.
-- It does show that 100% of children in 1st and 2nd class survived
+
+- It appears to show that 100% of children in 1st and 2nd class survived
   (which is not true), so there may be some data quality issues.
+
+  Addressing Lily’s comment– sorry, but your statement: “If you look at
+  the contents of the original dataset and look at the rows for 1st/2nd
+  class children, it does show that all of these children survived.” is
+  not accurate. See below:
+
+``` r
+df_titanic %>% filter(Class %in% c("1st", "2nd") & Survived == "No" & Age == "Child")
+```
+
+    ## # A tibble: 4 × 5
+    ##   Class Sex    Age   Survived     n
+    ##   <chr> <chr>  <chr> <chr>    <dbl>
+    ## 1 1st   Male   Child No           0
+    ## 2 2nd   Male   Child No           0
+    ## 3 1st   Female Child No           0
+    ## 4 2nd   Female Child No           0
+
 - If you saw something *fishy* in q4 above, use your new plot to explain
   the fishy-ness.
   - Now, we see that tons and tons of men and women that survived in 1st

@@ -229,7 +229,7 @@ min_year_gapminder_with_outliers <-
 
 min_year_gapminder_with_outliers %>%
   ggplot(aes(x = continent, y = gdpPercap)) + 
-  scale_y_break(c(15000, 107000)) +
+  scale_y_log10() +
   geom_boxplot() +
   geom_text(aes(label = outlier), na.rm = TRUE, hjust = -0.1) +
   ggtitle("GDP Per Capita vs. Continent, 1952") +
@@ -249,7 +249,7 @@ min_year_gapminder_with_outliers %>%
 **Difficulties & Approaches**:
 
 - Kuwait is a very powerful outlier, with their GDP around 108,000. To
-  solve this, I added a break in the Y axis between 15,000 and 107,000.
+  solve this, I switched the y-axis to use a log scale.
 - Without labeling the outliers, another plot or would be needed. To
   solve that, I added labels for the outliers.
 
@@ -351,6 +351,7 @@ final_data %>%
     mapping = aes(color = outlier),
     size = 2
   ) +
+  scale_y_log10() +
   facet_wrap(vars(year), scales = "free") +
   xlab("Continent") +
   ylab("GDP Per Capita (PPP$2017)")
@@ -360,7 +361,6 @@ final_data %>%
 
 **Observations**:
 
-- There are far fewer outliers in the Americas in the 2007 data
 - GDP per capita values all over the world (except in Kuwait) have risen
   drastically
 

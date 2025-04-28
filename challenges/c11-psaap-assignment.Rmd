@@ -22,7 +22,7 @@ Unlike exercises, **challenges will be graded**. The following rubrics define ho
 <!-- ------------------------- -->
 
 | Category | Needs Improvement | Satisfactory |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Effort | Some task **q**'s left unattempted | All task **q**'s attempted |
 | Observed | Did not document observations, or observations incorrect | Documented correct observations based on analysis |
 | Supported | Some observations not clearly supported by analysis | All observations clearly supported by analysis (table, graph, etc.) |
@@ -80,7 +80,11 @@ glimpse(df_psaap)
 
 **Observations**:
 
--   Lots of variables
+-   Lots of variables here, of many different categories:
+    -   Spatial variables (x)
+    -   Metadata (idx)
+    -   16 Input variables
+    -   Four output variables
 -   Could be pivoted wider to combine items inside idx, but likely easier to work this way
 
 The important variables in this dataset are:
@@ -174,7 +178,7 @@ metrics(nonphysical_test, truth = T_norm, estimate = pred)
 -   Which model is *most accurate*? Which is *least accurate*?
     -   The most accurate model is the cheat model, and the least accurate model is the nonphysical one, which links the value of the normalized fluid temperature rise to the index of the test performed.
 -   What *Category* of variable is `avg_T`? Why is it such an effective predictor?
-    -   `avg_T` is an output variable (plane-averaged fluid temperature), and it makes sense that the average temperature would be a good predictor of the normalized temperature.
+    -   `avg_T` is an output variable (plane-averaged fluid temperature in terms of `avg_T`: `T_norm = (avg_T - T_f) / T_f`), and it makes sense that the average temperature would be a good predictor of the normalized temperature.
 -   Would we have access to `avg_T` if we were trying to predict a *new* value of `T_norm`? Is `avg_T` a valid predictor?
     -   No. If we are trying to predict temperature, we can't use temperature to predict it.
 -   What *Category* of variable is `idx`? Does it have any physical meaning?
@@ -209,12 +213,19 @@ summary(fit_q4)
 -   Which inputs are *statistically significant*, according to the model?
     -   x, L, W, and I_0 are the most significant.
 -   What is the regression coefficient for `x`? What about the regression coefficient for `T_f`?
-    -   x = p ≤ 0.001 (highly significant), T_f = p \> 0.1 (not significant)
+    -   x = 1.018e+00 (highly significant), T_f = -3.791e-04
 -   What is the standard deviation of `x` in `df_psaap`? What about the standard deviation of `T_f`?
     -   0.281 / 38.9
--   How do these standard deviations relate to the regression coefficients for `x` and `T_f`?
-    -   They help us understand the magnitude of change.
-    -   A 1-SD increase in x → change in T_norm = 1.018 × 0.281 ≈ 0.286
+
+```{r}
+df_psaap %>% 
+  summarize(
+    sd_x = sd(x),
+    sd_T_f = sd(T_f)
+  )
+```
+
+-   How do these standard deviations relate to the regression coefficients for `x` and `T_f`? - They help us understand the magnitude of change. - A 1-SD increase in x → change in T_norm = 1.018 × 0.281 ≈ 0.286
 -   Note that literally *all* of the inputs above have *some* effect on the output `T_norm`; so they are all "significant" in that sense. What does this tell us about the limitations of statistical significance for interpreting regression coefficients?
     -   It's important to look at the p values to get a concrete idea of how correlated the variables are.
 
@@ -329,6 +340,7 @@ bind_rows(
     -   Therefore, since the q4 points appear closer to `y=x`, those are (generally) more accurate.
 -   Which model tends to be *more confident* in its predictions? Put differently, which model has *narrower prediction intervals*?
     -   The q4 model is also more confident in its predictions.
+    -   We can visually see that the prediction intervals are all very similar, around three, in the x-only model. However they are much smaller (none appear to go over 2.5) in the q4 model.
 -   How many predictors does the `fit_simple` model need in order to make a prediction? What about your model `fit_q4`?
     -   `fit_simple` used only one (`T_norm`). `fit_q4` used every input variable (all variables minus output and metadata variables) to predict the output.
 
@@ -361,7 +373,7 @@ df_design <- tibble(x = 1, L = 0.2, W = 0.04, U_0 = 1.0)
 # NOTE: This is the level the "probability" level customer wants
 pr_level <- 0.8
 
-## TODO: Fit a model, assess the uncertainty in your prediction, 
+# TODO: Fit a model, assess the uncertainty in your prediction, 
 #        use the validation data to check your uncertainty estimates, and 
 #        make a recommendation on a *dependable range* of values for T_norm
 #        at the point `df_design`
@@ -384,14 +396,31 @@ uncertainties
 
 -   How much do you trust your model? Why?
     -   I have some faith in this model. I took a look at the data for the row closest to the design variables, and I found one with `x = 1` , `L = 0.1952910`, `W = 0.03197750` , and `U_0 = 2.000712` (near double the design value), and `T_norm = 1.1279114`, which is somewhere near our range.
+    -   The empirical coverage is also 93.333%, meaning that our prediction intervals are conservative but effective.
 -   What kind of interval---confidence or prediction---would you use for this task, and why?
     -   I'm using a prediction interval because we care here about the range a new run will give given the uncontrolled variation.
 -   What fraction of validation cases lie within the intervals you predict? (NB. Make sure to calculate your intervals *based on the validation data*; don't just use one single interval!) How does this compare with `pr_level`?
-    -   There are 60 cases and only 3 in df_validate are in this range, so that's 1/20 or 5%.
+    -   93.333% of validation cases lie within the intervals, which is higher than the goal of 80%.
 
-        ```{r}
-        df_validate %>% filter(T_norm <= uncertainties$pred_upr & T_norm >= uncertainties$pred_lwr)
-        ```
+```{r}
+validate_with_intervals <- df_validate %>%
+  add_uncertainties(
+    data = .,
+    model = fit_q6,
+    prefix = "pred",
+    interval = "prediction",
+    level = pr_level
+  )
+
+validate_with_intervals <- validate_with_intervals %>%
+  mutate(
+    covered = (T_norm >= pred_lwr) & (T_norm <= pred_upr)
+  )
+
+empirical_coverage <- mean(validate_with_intervals$covered)
+empirical_coverage
+```
+
 -   What interval for `T_norm` would you recommend the design team to plan around?
     -   1.877 to 2.3.
 -   Are there any other recommendations you would provide?

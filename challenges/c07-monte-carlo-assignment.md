@@ -11,6 +11,7 @@ Sam Mendelson
   - [Implementation](#implementation)
     - [**q1** Generate a uniform random sample on the unit
       square](#q1-generate-a-uniform-random-sample-on-the-unit-square)
+    - [**q2** Write a helper function](#q2-write-a-helper-function)
     - [**q3** Estimate $\pi$](#q3-estimate-pi)
   - [Quantifying Uncertainty](#quantifying-uncertainty)
     - [**q4** Simulation-based
@@ -234,7 +235,7 @@ print("Good")
 
     ## [1] "Good"
 
-\###**q2** Write a helper function
+### **q2** Write a helper function
 
 Write a helper function `stat(x, y)` whose average (of the data from
 `q1`), will be $\pi$. Implement a test for correctness of your
@@ -299,12 +300,12 @@ print("Your assertions passed, but make sure they're checking the right thing!")
 
 - You chose a correct value of `stat(x, y)` when `x, y` is *outside* the
   circle. Why did you choose this value?
-  - I looked inside the graph above (the orange and black one), and saw
-    that 0.9, 0.9 is outside the circle.
+  - The probability that a random point falls inside the circle is
+    area_circle/area_square = pi/4. Therefore, 4\*stat will be pi.
 - You chose a correct value of `stat(x, y)` when `x, y` is *inside* the
   circle. Why did you choose this value?
-  - I chose 0.5, 0.5 - I did the same thing as I did above (looking at
-    the orange
+  - If a point is outside the circle it shouldn’t contribute towards pi.
+    Therefore, we count it as 0.
 
 ### **q3** Estimate $\pi$
 
@@ -322,7 +323,7 @@ df_q3
     ## # A tibble: 1 × 3
     ##   count_total count_A pi_est
     ##         <int>   <dbl>  <dbl>
-    ## 1        1000    3264   3.26
+    ## 1        1000    3100    3.1
 
 Use the following to check that you’ve used the correct variable names.
 (NB. This does not check correctness.)
@@ -402,10 +403,10 @@ df_q4 %>%
 
 - What is a range of plausible values, based on the sampling
   distribution you’ve generated?
-  - I’d say values between 3.13 and 3.16 are plausible, as the
-    distribution looks quite normal. There are more estimates higher
-    than lower (more \>3.2 then \<3.1) but the tip of the bell curve is
-    between 3.13 and 3.16.
+  - I’d say values between 3.13 and 3.16 are plausible, as the bulk of
+    the distribution falls between those values. There are more
+    estimates higher than lower (more \>3.2 then \<3.1) but the bulk of
+    the points are between 3.13 and 3.16.
 
 ### **q5** Bootstrap percentile confidence interval
 
@@ -422,7 +423,7 @@ df_q5 <-
   summarize(
     # TODO: Compute pi_lo and pi_up
     pi_lo = quantile(pi_est, probs = 0.025),
-    pi_up = quantile(pi, probs = 0.975)
+    pi_up = quantile(pi_est, probs = 0.975)
   )
 
 df_q5
@@ -431,7 +432,7 @@ df_q5
     ## # A tibble: 1 × 2
     ##   pi_lo pi_up
     ##   <dbl> <dbl>
-    ## 1  3.17  3.14
+    ## 1  3.00  3.21
 
 ### **q6** CLT confidence interval
 
@@ -461,7 +462,7 @@ df_q1 %>% mutate(indicator = as.numeric(x^2 + y^2 <= 1)) %>%
     ## # A tibble: 1 × 4
     ##   pi_est     se lower upper
     ##    <dbl>  <dbl> <dbl> <dbl>
-    ## 1   3.26 0.0490  3.17  3.36
+    ## 1    3.1 0.0528  3.00  3.20
 
 **Observations**:
 
@@ -469,7 +470,12 @@ df_q1 %>% mutate(indicator = as.numeric(x^2 + y^2 <= 1)) %>%
   - (Bootstrap CI: yes or no?) Yes!
   - (CLT CI: yes or no?) Yes!
 - How closely do your bootstrap CI and CLT CI agree?
-  - They’re exactly the same.
+  - They are very, very similar. The lower interval is different by less
+    than 0.001, and the upper interval is different by less than 0.003.
+    - Note that, when knitting, R appears to round values: the values
+      for the CLT interval are:
+      - Lower: 3.000636
+      - Upper: 3.208364
 - Comment on the width of your CI(s). Would your estimate of $\pi$ be
   good enough for roughly estimating an area (e.g., to buy enough paint
   for an art project)? Would your estimate of $\pi$ be good enough for

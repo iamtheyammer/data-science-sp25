@@ -1,7 +1,7 @@
 Michelson Speed-of-light Measurements
 ================
-(Your name here)
-2020-
+Sam Mendelson
+2025-02-13
 
 - [Grading Rubric](#grading-rubric)
   - [Individual](#individual)
@@ -239,17 +239,17 @@ print(lightspeed_error_error)
     ## [1] 100.542
 
 ``` r
-# compute the % difference between the real speed of light and the actual speed of light
-print((abs(LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON)/((LIGHTSPEED_VACUUM + LIGHTSPEED_MICHELSON))/2)*100)
+# compute the % error
+print((abs(LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON)/LIGHTSPEED_MICHELSON*100))
 ```
 
-    ## [1] 0.01263405
+    ## [1] 0.05052343
 
 **Observations**:
 
 - Michaelson’s estimate of his error (51m/s) is about 1/3 of the real
   error (~150m/s). However, in perspective of these numbers, his
-  estimate of the speed of light is just 0.013% off.
+  estimate of the speed of light is just 0.05% off.
 
 The following plot shows all of Michelson’s data as a [control
 chart](https://en.wikipedia.org/wiki/Control_chart); this sort of plot
@@ -384,7 +384,7 @@ df_with_error %>%
 
 **Observations**:
 
-- As temperature rises, distinctness goes up
+- The median of the temperature increases as the distinctness increases
 - Since higher distinctness indicates a better estimate, one could
   conclude that the best estimates are taken around 80˚F - however,
   there are two big outliers around 60˚F

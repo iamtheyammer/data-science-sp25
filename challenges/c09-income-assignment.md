@@ -515,7 +515,7 @@ and uncertainty.
 ``` r
 df_data %>%
   group_by(category) %>%
-  ggplot(aes(x = income_SE, y = population_estimate, color = category)) +
+  ggplot(aes(y = income_SE, x = population_estimate, color = category)) +
   scale_y_log10() +
   geom_point(alpha = 0.05) + 
   geom_smooth() + 
@@ -537,7 +537,7 @@ df_data %>%
 
 - What *overall* trend do you see between `SE` and population? Why might
   this trend exist?
-  - As standard error goes down, population goes down.
+  - As population goes down, standard error goes down.
   - This may exist because, when there are fewer people, there are fewer
     outliers (people with super high or super low incomes).
 - What does this *overall* trend tell you about the relative ease of
@@ -579,20 +579,21 @@ df_map <-
   mutate(fips = str_sub(Geography, -5)) %>%
   filter(category == "2-person families") %>%
   left_join(county_centroids, by = "fips") %>%
-  distinct(fips, .keep_all = TRUE) %>%
-  mutate(
-    values = income_SE
-  )
+  distinct(fips, .keep_all = TRUE)
 
 plot_usmap(
   data = df_map,
+  values = "income_SE",
   regions = "counties"
   ) +
-  # scale_fill_continuous(
-  #   low = "white", high = "red", name = "Percent Change", label = scales::comma,
-  # ) +
+  scale_fill_gradient(
+    trans = 'log',
+    high = '#0072B2',     # change the colors as necessary
+    low = 'white'
+  ) +
   theme(legend.position = "right") +
-  ggtitle("Median Income Estimate: Standard Error, 2018")
+  ggtitle("Median Income Estimate: Standard Error, 2018") +
+  labs(fill = "Standard Error")
 ```
 
 ![](c09-income-assignment_files/figure-gfm/q8-task-1.png)<!-- -->

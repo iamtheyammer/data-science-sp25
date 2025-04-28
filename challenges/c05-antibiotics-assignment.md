@@ -347,13 +347,14 @@ opportunity to think about why this is.**
 
 \- What is your response to the question above?
 
-Streptomycin appears most effective against gram-positive strepto- and
-diplococcus bacterias.
+Neomycin appears least effective against gram-positive strepto- and
+diplococcus bacteria.
 
-Penicillin appears most effective against gram-negative bacterias of all
+Penicillin appears most effective against gram-positive bacteria of all
 different types.
 
-Neomycin appears most effective against gram-positive streptococcus.
+Streptomycin appears particularly effective against gram-positive
+staphyloccocus and bacilus bacteria.
 
 - Which of your visuals above (1 through 5) is **most effective** at
   helping to answer this question?

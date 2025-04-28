@@ -231,8 +231,8 @@ summary(df_stang_long)
 
 - Is there “one true value” for the material properties of Aluminum?
 
-  - No, there is not. As the thickness changes, we see changes in both
-    `nu` and `E`.
+  - No, there is not. We see variation in both `nu` and `E` throughout
+    the dataset.
 
 - How many aluminum alloys are in this dataset? How do you know?
 
@@ -300,17 +300,19 @@ summary(df_stang_long)
     summarise(
       min_e = min(E),
       max_e = max(E),
-      range_e = diff(range(E))
+      range_e = diff(range(E)),
+      var_e = var(E)
     )
   ```
 
-      ## # A tibble: 1 × 3
-      ##   min_e max_e range_e
-      ##   <dbl> <dbl>   <dbl>
-      ## 1  9900 10700     800
+      ## # A tibble: 1 × 4
+      ##   min_e max_e range_e  var_e
+      ##   <dbl> <dbl>   <dbl>  <dbl>
+      ## 1  9900 10700     800 71954.
 
   Looks like the range of E is 800, meaning that the highest and lowest
-  values of E are 800 apart. In context, this is around a 8% variance.
+  values of E are 800 apart. In context, this is around a 8%
+  variability.
 
 ## Visualize
 
@@ -329,9 +331,10 @@ df_stang_long %>%
 
 **Observations**:
 
-- More data would help with understanding this relationship, as we only
-  have 26 observations, and since there are three angles, it divides the
-  amount of observations per angle by three.
+- More data (as in, more angles or thicknesses tested) would help with
+  understanding this relationship, as we only have 26 observations, and
+  since there are three angles, it divides the amount of observations
+  per angle by three.
 - There is more variation at 0˚ and 90˚ than there is at 45˚, except for
   an outlier.
 
@@ -367,11 +370,10 @@ df_stang_long %>%
     outliers that support the above claim, but it is still contradicted
     by the graph.
 - Is this evidence *conclusive* one way or another?
-  - No, this evidence is not conclusive. There are only 6-7 trials per
-    thickness, and they all use a flat sheet of metal - had the size of
-    the sample been expanded (also adding more material) rather than
-    increasing the thickness, it is possible that we would see a
-    different result.
+  - No, this evidence is not conclusive. There may be different
+    qualities of aluminum based on how they were made, therefore
+    aluminum from manufacturers/processes could produce different
+    results.
 
 # References
 
