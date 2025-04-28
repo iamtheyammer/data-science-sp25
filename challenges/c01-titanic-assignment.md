@@ -291,25 +291,7 @@ df_prop %>%
 - The proportion of survivors is highest in first class, followed by
   third class, then second class.
 
-- It appears to show that 100% of children in 1st and 2nd class survived
-  (which is not true), so there may be some data quality issues.
-
-  Addressing Lily’s comment– sorry, but your statement: “If you look at
-  the contents of the original dataset and look at the rows for 1st/2nd
-  class children, it does show that all of these children survived.” is
-  not accurate. See below:
-
-``` r
-df_titanic %>% filter(Class %in% c("1st", "2nd") & Survived == "No" & Age == "Child")
-```
-
-    ## # A tibble: 4 × 5
-    ##   Class Sex    Age   Survived     n
-    ##   <chr> <chr>  <chr> <chr>    <dbl>
-    ## 1 1st   Male   Child No           0
-    ## 2 2nd   Male   Child No           0
-    ## 3 1st   Female Child No           0
-    ## 4 2nd   Female Child No           0
+<!-- -->
 
 - If you saw something *fishy* in q4 above, use your new plot to explain
   the fishy-ness.
