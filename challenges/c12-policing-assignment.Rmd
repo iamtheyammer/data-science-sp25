@@ -1,7 +1,7 @@
 ---
 title: "Massachusetts Highway Stops"
-author: "(Your name here)"
-date: 2020-
+author: "Sam Mendelson"
+date: 2025-04-27
 output:
   github_document:
     toc: true
@@ -22,7 +22,7 @@ Unlike exercises, **challenges will be graded**. The following rubrics define ho
 <!-- ------------------------- -->
 
 | Category | Needs Improvement | Satisfactory |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Effort | Some task **q**'s left unattempted | All task **q**'s attempted |
 | Observed | Did not document observations, or observations incorrect | Documented correct observations based on analysis |
 | Supported | Some observations not clearly supported by analysis | All observations clearly supported by analysis (table, graph, etc.) |
@@ -53,7 +53,7 @@ library(broom)
 
 ```{r q1-task}
 ## TODO: Download the data, move to your data folder, and load it
-filename <- NA_character_
+filename <- "data/yg821jf8611_ma_statewide_2020_04_01.rds"
 df_data <- readRDS(filename)
 ```
 
@@ -63,11 +63,18 @@ df_data <- readRDS(filename)
 
 ### **q2** Do your "first checks" on the dataset. What are the basic facts about this dataset?
 
+```{r}
+summary(df_data)
+```
+
 **Observations**:
 
 -   What are the basic facts about this dataset?
--   (Your responses here)
--   ...
+    -   There are over 3.4 million observations - very cool
+    -   The date range is between 1/1/07 and 12/31/15
+    -   Subjects' ages range from 10-74 with an average of 36.47
+    -   Most subjects are white, and there are over 2 men per woman
+    -   There are then a number of boolean variables about the stop
 
 Note that we have both a `subject_race` and `race_Raw` column. There are a few possibilities as to what `race_Raw` represents:
 
@@ -80,14 +87,35 @@ Let's try to distinguish between these two possibilities.
 
 ```{r q3-task}
 ## TODO: Determine the factor levels for subject_race and raw_Race
+df_races <- df_data %>%
+  group_by(raw_Race, subject_race) %>%
+  summarize(subject_race_count = n())
 ```
 
 **Observations**:
 
 -   What are the unique values for `subject_race`?
+    -   asian/pacific islander
+    -   black
+    -   hispanic
+    -   white
+    -   other
+    -   unknown
+    -   NA
 -   What are the unique values for `raw_Race`?
+    -   A
+    -   American Indian or Alaskan Native
+    -   Asian or Pacific Islander
+    -   Black
+    -   Hispanic
+    -   Middle Eastern or East Indian (South Asian)
+    -   None - for no operator present citations
+    -   White
 -   What is the overlap between the two sets?
+    -   Races that are present in `subject_race` are directly copied, however "other" and "unknown" comprise different groups.
+    -   NAs are present in both.
 -   What is the difference between the two sets?
+    -   "A" and "American Indian or Alaskan Native" are marked as "other", and `None - for no operator present citations` are marked as "unknown" in subject_race.
 
 ### **q4** Check whether `subject_race` and `raw_Race` match for a large fraction of cases. Which of the two hypotheses above is most likely, based on your results?
 
@@ -95,6 +123,7 @@ Let's try to distinguish between these two possibilities.
 
 ```{r q4-task}
 ## TODO: Devise your own way to test the hypothesis posed above.
+df_data %>% filter(subject_race == "white" & raw_Race != "White")
 ```
 
 **Observations**
@@ -106,7 +135,8 @@ Between the two hypotheses:
 
 which is most plausible, based on your results?
 
--   (Your response here)
+-   `race_Raw` is most plausible as an unprocessed version of `subject_race`, as there are zero rows where `subject_race` == "white" and `raw_Race` != "White".
+-   While this is not completely guaranteed, it would mean that across all 3.4+ million stops, ONLY white officers could have stopped white subjects, which is highly unlikely.
 
 ## Vis
 
@@ -119,11 +149,57 @@ which is most plausible, based on your results?
 **Observations**:
 
 -   How does `arrest_rate` tend to vary with `subject_age`?
-    -   (Your response here)
+
+In general, arrest rates are highest for minors, however there are far fewer stops involving minors.
+
+```{r}
+df_data %>%
+  group_by(subject_age) %>%
+  summarize(arrest_rate = mean(arrest_made, na.rm = TRUE), num_obs = n()) %>%
+  ggplot(aes(subject_age, arrest_rate, color = num_obs)) +
+  geom_point() +
+  ggtitle("Subject Age vs. Arrest Rate, MA State Police 2007-2015") +
+  xlab("Subject Age") +
+  ylab("Arrest Rate") +
+  labs(color = "# Observations")
+```
+
 -   How does `arrest_rate` tend to vary with `subject_sex`?
-    -   (Your response here)
+
+It appears that arrest rates are highest for men.
+
+```{r}
+df_data %>%
+  group_by(subject_age, subject_sex) %>%
+  summarize(arrest_rate = mean(arrest_made, na.rm = TRUE), num_obs = n()) %>%
+  ggplot(aes(subject_age, arrest_rate, color = num_obs)) +
+  geom_point() +
+  facet_wrap(~subject_sex) +
+  ggtitle("Subject Age vs. Arrest Rate, MA State Police 2007-2015") +
+  xlab("Subject Age") +
+  ylab("Arrest Rate") +
+  labs(color = "# Observations")
+```
+
 -   How does `arrest_rate` tend to vary with `subject_race`?
-    -   (Your response here)
+
+Note that for clarity, some outliers have been removed.
+
+Overall, arrest rates are highest for the hispanic race, then black, then white.
+
+```{r}
+df_data %>%
+  group_by(subject_age, subject_race) %>%
+  summarize(arrest_rate = mean(arrest_made, na.rm = TRUE), num_obs = n()) %>%
+  ggplot(aes(subject_age, arrest_rate, color = subject_race)) +
+  geom_point() +
+  ylim(0, 0.23) +
+  # facet_wrap(~subject_race, scales = "free") +
+  ggtitle("Subject Age vs. Arrest Rate, MA State Police 2007-2015") +
+  xlab("Subject Age") +
+  ylab("Arrest Rate") +
+  labs(color = "# Observations")
+```
 
 # Modeling
 
@@ -152,9 +228,9 @@ fit_q6 %>% tidy()
 **Observations**:
 
 -   Which `subject_race` levels are included in fitting the model?
-    -   (Your response here)
+    -   Only white, black, and hispanic.
 -   Which `subject_race` levels have terms in the model?
-    -   (Your response here)
+    -   Only hispanic.
 
 You should find that each factor in the model has a level *missing* in its set of terms. This is because R represents factors against a *reference level*: The model treats one factor level as "default", and each factor model term represents a change from that "default" behavior. For instance, the model above treats `subject_sex==male` as the reference level, so the `subject_sexfemale` term represents the *change in probability* of arrest due to a person being female (rather than male).
 
@@ -167,6 +243,17 @@ By default `glm` uses the first factor level present as the reference level. The
 ```{r q7-task}
 ## TODO: Re-fit the logistic regression, but set "white" as the reference
 ## level for subject_race
+fit_q7 <-
+  glm(
+    formula = arrest_made ~ subject_age + subject_race + subject_sex,
+    data = df_data %>%
+      mutate(factor = fct_relevel(subject_race, "white")) %>%
+      filter(
+        !is.na(arrest_made),
+        subject_race %in% c("white", "black", "hispanic")
+      ),
+    family = "binomial"
+  )
 
 fit_q7 %>% tidy()
 ```
@@ -174,11 +261,14 @@ fit_q7 %>% tidy()
 **Observations**:
 
 -   Which `subject_race` level has the highest probability of being arrested, according to this model? Which has the lowest probability?
-    -   (Your response here)
+    -   According to this model, hispanic people have the highest probability of being arrested, and white people have the lowest probability.
 -   What could explain this difference in probabilities of arrest across race? List **multiple** possibilities.
-    -   (Your response here)
+    -   There could be less hispanic people in Massachusetts, therefore they would be less likely to have many stops that do not result in an arrest (like speeding/parking tickets).
+    -   Hispanic people could be less likely to drive, therefore also resulting in less stops that do NOT result in an arrest.
+    -   There could be bias from the arresting officers, whose biases could result in more hispanic people getting arrested.
 -   Look at the set of variables in the dataset; do any of the columns relate to a potential explanation you listed?
-    -   (Your response here)
+    -   There are some contraband columns, relating to types of contraband that officers may have found. It's possible that biases would result in the fact that more arrests happen after a contraband discovery from a hispanic subject.
+    -   Reason for stop could be important, but this would require much more work to categorize (it's comma-separated)
 
 One way we can explain differential arrest rates is to include some measure indicating the presence of an arrestable offense. We'll do this in a particular way in the next task.
 
@@ -187,21 +277,60 @@ One way we can explain differential arrest rates is to include some measure indi
 ```{r q8-task}
 ## TODO: Repeat the modeling above, but control for whether contraband was found
 ## during the police stop
+fit_q8 <-
+  glm(
+    formula = arrest_made ~ subject_age + subject_race + subject_sex + contraband_found,
+    data = df_data %>%
+      mutate(factor = fct_relevel(subject_race, "white")) %>%
+      filter(
+        !is.na(arrest_made),
+        subject_race %in% c("white", "black", "hispanic")
+      ),
+    family = "binomial"
+  )
+
 fit_q8 %>% tidy()
 ```
 
 **Observations**:
 
 -   How does controlling for found contraband affect the `subject_race` terms in the model?
-    -   (Your response here)
+    -   The presence of contraband is now the largest factor, which has diminished the effect of the race term significantly.
 -   What does the *finding of contraband* tell us about the stop? What does it *not* tell us about the stop?
-    -   (Your response here)
+    -   The finding of contraband tells us that the stop was likely to result in an arrest.
+    -   It does NOT tell us what the contraband was, how much there was, or any other factors that could contribute to an arrest.
 
 ### **q9** Go deeper: Pose at least one more question about the data and fit at least one more model in support of answering that question.
 
+How do frisks influence arrests?
+
+```{r q9-task}
+## TODO: Repeat the modeling above, but control for whether contraband was found
+## during the police stop
+fit_q9 <-
+  glm(
+    formula = arrest_made ~ frisk_performed + search_conducted,
+    data = df_data %>%
+      mutate(factor = fct_relevel(subject_race, "white")) %>%
+      filter(
+        !is.na(arrest_made),
+        subject_race %in% c("white", "black", "hispanic")
+      ),
+    family = "binomial"
+  )
+
+fit_q9 %>% tidy()
+```
+
 **Observations**:
 
--   Document your question and findings
+-   My question is: "How do the odds of a frisk or a search influence the odds of an arrest?"
+-   It looks like the odds of a **frisk** decreases the chance of arrest, but the odds of a **search** increase the odds.
+-   I was really curious why this was, so I did some research on the legal difference between a search and frisk.
+    -   The difference between a frisk and a search is that the purpose of a frisk is limited to finding weapons hidden on the suspect to ensure the personal safety of police officers, its scope is limited to weapons and not for the discovery of other evidence; a search generally requires a search warrant , and its purpose is mainly to find evidence of illegal criminal activity. ([source](https://www.law.cornell.edu/wex/frisk#:~:text=The%20difference%20between%20a%20frisk,warrant%20%2C%20and%20its%20purpose%20is))
+-   Since a search requires a warrant, it makes sense that the arrest probability would rise: if a judge believes that there may be evidence for an arrest, then there is a reasonable chance that one is made after the search.
+-   And, since a frisk helps to ensure that there are no weapons on a subject (or that those weapons are disclosed), officers might feel safer and therefore less likely to arrest the subject.
+-   Not really an observation, but it was interesting to learn the (legal) difference between a search and a frisk.
 
 ## Further Reading
 
