@@ -28,7 +28,7 @@ Unlike exercises, **challenges will be graded**. The following rubrics define ho
 <!-- ------------------------- -->
 
 | Category | Needs Improvement | Satisfactory |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Effort | Some task **q**'s left unattempted | All task **q**'s attempted |
 | Observed | Did not document observations, or observations incorrect | Documented correct observations based on analysis |
 | Supported | Some observations not clearly supported by analysis | All observations clearly supported by analysis (table, graph, etc.) |
@@ -228,16 +228,16 @@ When we take out the children from our density plot, we get a very different sha
 ```{r}
 df |>
   ggplot(aes(x = NetWorth, color = Town)) +
-  geom_density()
+  geom_freqpoly()
 
 df |>
   filter(Age >= 18) |>
   ggplot(aes(x = NetWorth, color = Town)) +
-  geom_density()
+  geom_freqpoly()
 
 ```
 
-Continuing with our densities analysis, we can look at the spread of the distribution of wealth on each island. All curves show a strong right skew, meaning most values cluster toward the lower end of net worth. Some towns have a noticeably broader spread in net worth (Blonduos, Vardo, Helvig), potentially indicating a more diverse population in terms of financial status.
+Continuing with our densities analysis, we can look at the spread of the distribution of wealth on each island. All curves show a strong left skew, meaning most values cluster toward the lower end of net worth. Some towns have a noticeably broader spread in net worth (Blonduos, Vardo, Helvig), potentially indicating a more diverse population in terms of financial status.
 
 If we look only at the adults in the dataset, we see a very similar plot.
 

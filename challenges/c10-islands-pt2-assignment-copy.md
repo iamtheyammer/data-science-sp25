@@ -388,8 +388,10 @@ the smaller sampling size.
 ``` r
 df |>
   ggplot(aes(x = NetWorth, color = Town)) +
-  geom_density()
+  geom_freqpoly()
 ```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 ![](c10-islands-pt2-assignment-copy_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
@@ -397,13 +399,15 @@ df |>
 df |>
   filter(Age >= 18) |>
   ggplot(aes(x = NetWorth, color = Town)) +
-  geom_density()
+  geom_freqpoly()
 ```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 ![](c10-islands-pt2-assignment-copy_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
 
 Continuing with our densities analysis, we can look at the spread of the
-distribution of wealth on each island. All curves show a strong right
+distribution of wealth on each island. All curves show a strong left
 skew, meaning most values cluster toward the lower end of net worth.
 Some towns have a noticeably broader spread in net worth (Blonduos,
 Vardo, Helvig), potentially indicating a more diverse population in
