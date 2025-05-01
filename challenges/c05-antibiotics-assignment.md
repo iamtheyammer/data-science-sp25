@@ -203,16 +203,21 @@ is Gram positive or negative.
 # WRITE YOUR CODE HERE
 df_pivoted %>%
   # group_by(antibiotic) %>%
-  ggplot(aes(x = bacteria, y = value, color = gram)) +
-  geom_point() +
-  facet_wrap(~ antibiotic, scales = "free") +
+  ggplot(aes(x = fct_reorder(bacteria, value), y = value, color = gram, shape = antibiotic)) +
+  geom_point(position = "dodge") +
+  geom_hline(yintercept = 0.1) +
+  # facet_wrap(~ antibiotic, scales = "free") +
   theme(
     axis.text.x = element_text(angle = 270)
   ) +
   ylab("Minimum Inhibitory Concentration (MIC)") +
   xlab("Bacteria") +
+  scale_y_log10() +
   ggtitle("Bacteria vs. Minimum Inhibitory Concentration (MIC) by Antibiotic")
 ```
+
+    ## Warning: Width not defined
+    ## ℹ Set with `position_dodge(width = ...)`
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.1-1.png)<!-- -->
 
@@ -229,7 +234,7 @@ your other visuals.
 ``` r
 # WRITE YOUR CODE HERE
 df_pivoted %>%
-  ggplot(aes(x = fct_reorder(bacteria, gram), y = antibiotic, fill = value_norm)) +
+  ggplot(aes(x = fct_reorder(bacteria, value), y = antibiotic, fill = value_norm)) +
   geom_tile() +
   geom_text(aes(label = gram_symbol), color = "white", size = 4) +
   theme(
@@ -258,15 +263,18 @@ df_pivoted %>%
   # filter(
   #   antibiotic == "penicillin"
   # ) %>%
-  ggplot(aes(x = fct_reorder(bacteria, gram), y = value_norm, color = antibiotic, shape = gram)) +
+  ggplot(aes(x = fct_reorder(bacteria, value), y = value_norm, color = antibiotic, shape = gram)) +
   theme(
     axis.text.x = element_text(angle = 270)
   ) +
   geom_point() +
   xlab("Bacteria") +
   ylab("Normalized MIC") +
+  scale_y_log10() +
   ggtitle("Normalized MIC by Bacteria and Antibiotic")
 ```
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.3-1.png)<!-- -->
 
@@ -286,10 +294,12 @@ df_pivoted %>%
   # filter(
   #   antibiotic == "penicillin"
   # ) %>%
-  ggplot(aes(x = fct_reorder(bacteria, gram), y = value)) +
+  ggplot(aes(x = fct_reorder(bacteria, value), y = value)) +
   geom_col() +
+  geom_hline(yintercept = 0.1) +
   facet_wrap(~ bacteria, scales = "free") +
   ylab("MIC") +
+  scale_y_log10() +
   ggtitle("MIC by Bacteria and Antibiotic") +
   xlab("Bacteria")
 ```
@@ -311,11 +321,12 @@ df_pivoted %>%
   # filter(
   #   antibiotic == "penicillin"
   # ) %>%
-  ggplot(aes(x = bacteria, y = value_norm, color = antibiotic)) +
+  ggplot(aes(x = fct_reorder(bacteria, value), y = value, color = gram)) +
   theme(
     axis.text.x = element_text(angle = 270)
   ) +
   geom_point() +
+  geom_hline(yintercept = 0.1) +
   facet_wrap(~ gram, shrink = TRUE) +
   ylab("Normalized MIC") +
   ggtitle("Normalized MIC by Bacteria and Antibiotic, Separated by Gram") +

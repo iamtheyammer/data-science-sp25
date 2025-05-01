@@ -319,22 +319,15 @@ It appears that arrest rates are highest for men.
 
 ``` r
 df_data %>%
-  group_by(subject_age, subject_sex) %>%
+  group_by(subject_sex) %>%
   summarize(arrest_rate = mean(arrest_made, na.rm = TRUE), num_obs = n()) %>%
-  ggplot(aes(subject_age, arrest_rate, color = num_obs)) +
-  geom_point() +
-  facet_wrap(~subject_sex) +
-  ggtitle("Subject Age vs. Arrest Rate, MA State Police 2007-2015") +
-  xlab("Subject Age") +
+  ggplot(aes(subject_sex, arrest_rate)) +
+  geom_col() +
+  ggtitle("Subject Sex vs. Arrest Rate, MA State Police 2007-2015") +
+  xlab("Subject Sex") +
   ylab("Arrest Rate") +
   labs(color = "# Observations")
 ```
-
-    ## `summarise()` has grouped output by 'subject_age'. You can override using the
-    ## `.groups` argument.
-
-    ## Warning: Removed 3 rows containing missing values or values outside the scale range
-    ## (`geom_point()`).
 
 ![](c12-policing-assignment_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
@@ -347,23 +340,14 @@ then white.
 
 ``` r
 df_data %>%
-  group_by(subject_age, subject_race) %>%
+  group_by(subject_race) %>%
   summarize(arrest_rate = mean(arrest_made, na.rm = TRUE), num_obs = n()) %>%
-  ggplot(aes(subject_age, arrest_rate, color = subject_race)) +
-  geom_point() +
-  ylim(0, 0.23) +
-  # facet_wrap(~subject_race, scales = "free") +
-  ggtitle("Subject Age vs. Arrest Rate, MA State Police 2007-2015") +
-  xlab("Subject Age") +
-  ylab("Arrest Rate") +
-  labs(color = "# Observations")
+  ggplot(aes(subject_race, arrest_rate)) +
+  geom_col() +
+  ggtitle("Subject Sex vs. Arrest Rate, MA State Police 2007-2015") +
+  xlab("Subject Sex") +
+  ylab("Arrest Rate")
 ```
-
-    ## `summarise()` has grouped output by 'subject_age'. You can override using the
-    ## `.groups` argument.
-
-    ## Warning: Removed 9 rows containing missing values or values outside the scale range
-    ## (`geom_point()`).
 
 ![](c12-policing-assignment_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
@@ -407,7 +391,7 @@ fit_q6 %>% tidy()
 - Which `subject_race` levels are included in fitting the model?
   - Only white, black, and hispanic.
 - Which `subject_race` levels have terms in the model?
-  - Only hispanic.
+  - Hispanic and white.
 
 You should find that each factor in the model has a level *missing* in
 its set of terms. This is because R represents factors against a
@@ -441,11 +425,11 @@ fit_q7 <-
   glm(
     formula = arrest_made ~ subject_age + subject_race + subject_sex,
     data = df_data %>%
-      mutate(factor = fct_relevel(subject_race, "white")) %>%
       filter(
         !is.na(arrest_made),
         subject_race %in% c("white", "black", "hispanic")
-      ),
+      ) %>%
+      mutate(factor = fct_relevel(subject_race, "white")),
     family = "binomial"
   )
 
@@ -499,11 +483,11 @@ fit_q8 <-
   glm(
     formula = arrest_made ~ subject_age + subject_race + subject_sex + contraband_found,
     data = df_data %>%
-      mutate(factor = fct_relevel(subject_race, "white")) %>%
       filter(
         !is.na(arrest_made),
         subject_race %in% c("white", "black", "hispanic")
-      ),
+      ) %>%
+      mutate(factor = fct_relevel(subject_race, "white")),
     family = "binomial"
   )
 
